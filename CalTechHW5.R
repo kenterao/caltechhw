@@ -149,7 +149,7 @@ eout_list = c(eout_list, E_out)
 summary(epoch_list)
 summary(eout_list)
 
-
+## Additional comment
 
 w0 = W[1]
 w1 = W[2]
