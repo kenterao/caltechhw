@@ -107,31 +107,83 @@ rho_vec[3] = sqrt(9 + 4*sqrt(6))
 rho_vec[4] = sqrt(9-sqrt(6))
 
 for(rho in rho_vec) {
-print(rho)
-
-X = data.frame( x=c(-1,rho,1), y=c(0,1,0))
-print(X)
-
-index = 1:dim(X)[1]
-
-SSE = 0
-for( k in index) {
-	reg1 = lm(y ~ 1, data=X, subset=which(index!=k))
-	yk_hat = predict(reg1, newdata=X[k,])
-	yk = X$y[k]
-	SSE = SSE + (yk_hat - yk)^2
+	print(rho)
+	
+	X = data.frame( x=c(-1,rho,1), y=c(0,1,0))
+	print(X)
+	
+	index = 1:dim(X)[1]
+	
+	SSE = 0
+	for( k in index) {
+		regk = lm(y ~ 1, data=X[-k,])
+		yk_hat = predict(regk, newdata=X[k,])
+		yk = X$y[k]
+		SSE = SSE + (yk_hat - yk)^2
+	}
+	print(SSE)
+	
+	SSE = 0
+	for( k in index) {
+		regk = lm(y ~ x + 1, data=X[-k,])
+		yk_hat = predict(regk, newdata=X[k,])
+		yk = X$y[k]
+		SSE = SSE + (yk_hat - yk)^2
+	}
+	print(SSE)
 }
-print(SSE)
 
-SSE = 0
-for( k in index) {
-	reg1 = lm(y ~ x + 1, data=X, subset=which(index!=k))
-	yk_hat = predict(reg1, newdata=X[k,])
-	yk = X$y[k]
-	SSE = SSE + (yk_hat - yk)^2
-}
-print(SSE)
 
+## Homework 7.8
+library(e1071)
+getRandomHyperplane = function() {
+	r = runif(4)*2 - 1	
+	x1 = r[1]; y1 = r[2]; x2 = r[3]; y2 = r[4]
+	w0 = y1*x2 - x1*y2
+	w1 = y2 - y1
+	w2 = x1 - x2
+	W = matrix(c(w0,w1,w2),3,1)
 }
+
+getRandomPoints = function(W,N) {
+	df = data.frame( x0=rep(1,N), x1=runif(N)*2-1, x2=runif(N)*2-1 )
+	df$y = sign(as.matrix(df) %*% W)
+	df
+}
+
+plane = getRandomHyperplane()
+df_in = getRandomPoints(plane,10)
+df_out = getRandomPoints(plane,1000)
+
+svm.model = svm(y ~ x1 + x2, data=df_in)
+yhat_out = predict(svm.model, newdata=df_out)
+y_out = df_out$y
+E_out = sum(y_out!=yhat_out) / length(y_out)
+E_out
+
+
+w_old = matrix(c(1,1,1),3,1)
+w_new = matrix(c(1,0,0),3,1)
+nu = 0.01
+for(ii in 1:2) {
+	w_old = w_new
+	## permute matrix here
+	N = dim(df)[1]
+	for(jj in 1:N) {
+		y_n = df[jj,"y"] 
+		x_n = df[jj,1:3]
+		e_n  = (-1 * y_n * x_n) / (1 + exp( y_n * as.matrix(x_n) %*% w_new ) )	
+		w_new = w_new - nu * e_n
+		w_new = as.matrix(as.numeric(w_new))
+	}
+	print(w_old)
+	print(w_new)
+}
+
+
+
+
+
+
 
 
