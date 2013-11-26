@@ -90,10 +90,48 @@ print(val_vec)
 print(out_vec)
 
 
+## Homework 7.6
+e1 = runif(1000)
+e2 = runif(1000)
+e_min = pmin(e1,e2)
 
+mean(e1)
+mean(e2)
+mean(e_min)
 
+## Homework 7.7
+rho_vec = c(0,0,0,0)
+rho_vec[1] = sqrt(sqrt(3)+4)
+rho_vec[2] = sqrt(sqrt(3)-1)
+rho_vec[3] = sqrt(9 + 4*sqrt(6))
+rho_vec[4] = sqrt(9-sqrt(6))
 
+for(rho in rho_vec) {
+print(rho)
 
+X = data.frame( x=c(-1,rho,1), y=c(0,1,0))
+print(X)
 
+index = 1:dim(X)[1]
+
+SSE = 0
+for( k in index) {
+	reg1 = lm(y ~ 1, data=X, subset=which(index!=k))
+	yk_hat = predict(reg1, newdata=X[k,])
+	yk = X$y[k]
+	SSE = SSE + (yk_hat - yk)^2
+}
+print(SSE)
+
+SSE = 0
+for( k in index) {
+	reg1 = lm(y ~ x + 1, data=X, subset=which(index!=k))
+	yk_hat = predict(reg1, newdata=X[k,])
+	yk = X$y[k]
+	SSE = SSE + (yk_hat - yk)^2
+}
+print(SSE)
+
+}
 
 
